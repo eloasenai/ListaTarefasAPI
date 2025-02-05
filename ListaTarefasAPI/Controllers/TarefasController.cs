@@ -42,6 +42,12 @@ namespace ListaTarefasAPI.Controllers
             return tarefa;
         }
 
+        [HttpGet("concluidas")]
+        public async Task<ActionResult<IEnumerable<Tarefa>>> GetTarefaconcluidas()
+        {
+            return await _context.Tarefas.Where(t => t.Concluida == true).ToListAsync();
+        }
+
         // PUT: api/Tarefas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -95,6 +101,23 @@ namespace ListaTarefasAPI.Controllers
             }
 
             _context.Tarefas.Remove(tarefa);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        // Novo endpoint para finalizar uma tarefa
+        [HttpPost("finalizar/{id}")]
+        public async Task<IActionResult> FinalizarTarefa(int id)
+        {
+            var tarefa = await _context.Tarefas.FindAsync(id);
+            if (tarefa == null)
+            {
+                return NotFound();
+            }
+
+            tarefa.Concluida = true;
+            _context.Entry(tarefa).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
             return NoContent();
